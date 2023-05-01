@@ -1,6 +1,11 @@
 package pl.aleh.UserAccountSecurity.models;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
@@ -26,6 +31,9 @@ public class Person {
 
   @Column(name = "password")
   private String password;
+
+  @Column(name = "role")
+  private String role;
 
   public Person() {
   }
@@ -67,6 +75,14 @@ public class Person {
     this.password = password;
   }
 
+  public String getRole() {
+    return role;
+  }
+
+  public void setRole(final String role) {
+    this.role = role;
+  }
+
   @Override
   public String toString() {
     return "Person{" +
@@ -76,5 +92,4 @@ public class Person {
         ", password='" + password + '\'' +
         '}';
   }
-
 }

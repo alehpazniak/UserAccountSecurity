@@ -1,7 +1,9 @@
 package pl.aleh.UserAccountSecurity.security;
 
 import java.util.Collection;
+import java.util.Collections;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import pl.aleh.UserAccountSecurity.models.Person;
 
@@ -16,7 +18,7 @@ public class PersonDetails implements UserDetails {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return null;
+    return Collections.singletonList(new SimpleGrantedAuthority(person.getRole()));
   }
 
   @Override
