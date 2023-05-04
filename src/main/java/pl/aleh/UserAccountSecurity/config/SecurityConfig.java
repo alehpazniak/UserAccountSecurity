@@ -2,13 +2,16 @@ package pl.aleh.UserAccountSecurity.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import pl.aleh.UserAccountSecurity.services.PersonDetailsService;
 
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -16,17 +19,21 @@ import pl.aleh.UserAccountSecurity.services.PersonDetailsService;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   private final PersonDetailsService personDetailsService;
+  private final JWTFilter jwtFilter;
 
   @Autowired
-  public SecurityConfig(final PersonDetailsService personDetailsService) {
+  public SecurityConfig(final PersonDetailsService personDetailsService, final JWTFilter jwtFilter) {
     this.personDetailsService = personDetailsService;
+    this.jwtFilter = jwtFilter;
   }
 
   //configuring Spring Security
   //configuring authorization
   @Override
   protected void configure(HttpSecurity httpSecurity) throws Exception {
-    httpSecurity.authorizeHttpRequests()
+    httpSecurity
+        .csrf().disable()
+        .authorizeHttpRequests()
         .antMatchers("/auth/login", "/auth/registration", "/error").permitAll()
         .anyRequest().hasAnyRole("USER", "ADMIN")
         .and()
@@ -37,7 +44,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .and()
         .logout()
         .logoutUrl("/logout")
-        .logoutSuccessUrl("/auth/login");
+        .logoutSuccessUrl("/auth/login")
+        .and()
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+    httpSecurity.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
   }
 
   //Setting up authentication
@@ -49,4 +61,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   public PasswordEncoder getPasswordEncoder() {
     return new BCryptPasswordEncoder();
   }
+
+  @Bean
+  @Override
+  public AuthenticationManager authenticationManager() throws Exception {
+    return super.authenticationManager();
+  }
+
 }
